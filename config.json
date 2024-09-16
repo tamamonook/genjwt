@@ -1,7 +1,6 @@
 {
     "sub": "1234567890",
     "name": "Kong EE",
-    "admin": true,
     "iss": "testkey",
     "iat_offset": 0,
     "exp_offset": 157788000

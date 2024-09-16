@@ -4,12 +4,12 @@ import json
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-def read_private_key(file_path):
+def read_private_key(file_path, password=None):
     """Read private key from file"""
     with open(file_path, "rb") as key_file:
         private_key = serialization.load_pem_private_key(
             key_file.read(),
-            password=None,
+            password=password.encode() if password else None,
             backend=default_backend()
         )
     return private_key
@@ -67,14 +67,17 @@ config = read_config(config_file)
 
 # Generate current Unix timestamp
 int_time = int(time.time())
-exp_time = int_time + config['exp_offset']
+exp_time = int_time + config.get('exp_offset', 3600)  # Default to 3600 seconds (1 hour) if not in config
 
 # Generate JWT token with payload from configuration
 payload = {
-    "iss": config['iss'],
-    "iat": int_time + config['iat_offset'],
-    "exp": exp_time
+    "iss": config.get('iss', 'default_issuer'),
+    "iat": int_time + config.get('iat_offset', 0),  # Default to 0 if not in config
+    "exp": exp_time,
+    "name": config.get('name', 'default_name'),   # Additional field 'aud'
+    "sub": config.get('sub', 'default_subject')     # Additional field 'sub'
 }
+
 jwt_token = generate_jwt_token(payload, private_key)
 
 print("JWT Token:")
